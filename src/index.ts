@@ -1,24 +1,71 @@
-import { serve } from '@hono/node-server'
-import { Hono, type Context } from 'hono'
+import { serve } from '@hono/node-server';
+import { serveStatic } from '@hono/node-server/serve-static';
+import { Hono, type Context } from 'hono';
+import fs from 'fs';
+import { promises as fsPromises } from 'fs';
+const app = new Hono();
 
-const app = new Hono()
+// Serve the images in the image folder
+app.use('/images/*', serveStatic({ root: './' }));
 
 app.get('/', (c) => {
-  return c.text('Hello Hono!')
-})
+	return c.text('Hello Hono!');
+});
 
-app.post('/hello/:id', (c) => {
-  const data = c.req.param('id')
-  return c.text(data)
-})
-
+// Upload handler
 app.post('/upload', async (c) => {
-  const body = await c.req.parseBody();
-  console.log(body['img-file'])
+	const body = await c.req.parseBody();
+	const file = body['img-file'] as File;
+	const bFile = await file.arrayBuffer();
+	const newFile = Buffer.from(bFile);
+
+	fs.writeFile(`./images/${body['img-title']}.png`, newFile, (err) => {
+		if (err) {
+			console.error('Error writing image:', err);
+		} else {
+			console.log('Image saved successfully!');
+		}
+	});
+});
+
+// For the random images
+app.get('/generate-img', async (c) => {
+	// url of the page
+	const url = new URL(c.req.url);
+	const originUrl = url.origin;
+	const files = await fs.promises.readdir('./images');
+	if (files.length === 0) {
+		return c.json({ error: 'failed to work, sry' }, 500);
+	}
+	// The random index
+	const index = Math.floor(Math.random() * files.length);
+	const randomFile = files[index];
+	return c.json({
+		location: `${originUrl}/images/${randomFile}`
+	});
+});
+
+app.get('/gallery', async (c) => {
+	// url of the page
+	const url = new URL(c.req.url);
+	const originUrl = url.origin;
+
+	const files = await fs.promises.readdir('./images')
+	files.forEach((val, i, arr) => {
+		arr[i] = `${originUrl}/images/${val}` // basically modify each item in the array to include the actual location of the image
+	})
+	return c.json({files})
 })
-serve({
-  fetch: app.fetch,
-  port: 3000
-}, (info) => {
-  console.log(`Server is running on http://localhost:${info.port}`)
+app.post('/contact', async (c) => {
+	
 })
+serve(
+	{
+		fetch: app.fetch,
+		port: 3000,
+	},
+	(info) => {
+		console.log(`Server is running on http://localhost:${info.port}`);
+		console.log(process.cwd());
+	},
+);
