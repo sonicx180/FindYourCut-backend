@@ -56,9 +56,7 @@ app.get('/gallery', async (c) => {
 	})
 	return c.json({files})
 })
-app.post('/contact', async (c) => {
-	
-})
+
 serve(
 	{
 		fetch: app.fetch,
