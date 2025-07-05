@@ -3,10 +3,13 @@ import { serveStatic } from '@hono/node-server/serve-static';
 import { Hono, type Context } from 'hono';
 import fs from 'fs';
 import { promises as fsPromises } from 'fs';
+import { cors } from 'hono/cors'
 const app = new Hono();
 
 // Serve the images in the image folder
 app.use('/images/*', serveStatic({ root: './' }));
+
+app.use('*', cors())
 
 app.get('/', (c) => {
 	return c.text('Hello Hono!');
