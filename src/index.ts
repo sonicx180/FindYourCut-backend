@@ -3,13 +3,13 @@ import { serveStatic } from '@hono/node-server/serve-static';
 import { Hono, type Context } from 'hono';
 import fs from 'fs';
 import { promises as fsPromises } from 'fs';
-import { cors } from 'hono/cors'
+import { cors } from 'hono/cors';
 const app = new Hono();
 
 // Serve the images in the image folder
 app.use('/images/*', serveStatic({ root: './' }));
 
-app.use('*', cors())
+app.use('*', cors());
 
 app.get('/', (c) => {
 	return c.text('Hello Hono!');
@@ -44,7 +44,7 @@ app.get('/generate-img', async (c) => {
 	const index = Math.floor(Math.random() * files.length);
 	const randomFile = files[index];
 	return c.json({
-		location: `${originUrl}/images/${randomFile}`
+		location: `${originUrl}/images/${randomFile}`,
 	});
 });
 
@@ -53,12 +53,12 @@ app.get('/gallery', async (c) => {
 	const url = new URL(c.req.url);
 	const originUrl = url.origin;
 
-	const files = await fs.promises.readdir('./images')
+	const files = await fs.promises.readdir('./images');
 	files.forEach((val, i, arr) => {
-		arr[i] = `${originUrl}/images/${val}` // basically modify each item in the array to include the actual location of the image
-	})
-	return c.json({files})
-})
+		arr[i] = `${originUrl}/images/${val}`; // basically modify each item in the array to include the actual location of the image
+	});
+	return c.json(files);
+});
 
 serve(
 	{
