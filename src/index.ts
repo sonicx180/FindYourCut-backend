@@ -4,6 +4,8 @@ import { Hono, type Context } from 'hono';
 import fs from 'fs';
 import { promises as fsPromises } from 'fs';
 import { cors } from 'hono/cors';
+import path from 'path';
+
 const app = new Hono();
 
 // Serve the images in the image folder
@@ -47,17 +49,20 @@ app.get('/generate-img', async (c) => {
 		location: `${originUrl}/images/${randomFile}`,
 	});
 });
-
 app.get('/gallery', async (c) => {
-	// url of the page
 	const url = new URL(c.req.url);
 	const originUrl = url.origin;
 
 	const files = await fs.promises.readdir('./images');
-	files.forEach((val, i, arr) => {
-		arr[i] = `${originUrl}/images/${val}`; // basically modify each item in the array to include the actual location of the image
+	const fileData = files.map((file) => {
+		const nameWithoutExt = path.parse(file).name;
+		return {
+			name: nameWithoutExt,
+			location: `${originUrl}/images/${file}`,
+		};
 	});
-	return c.json(files);
+
+	return c.json({ files: fileData });
 });
 
 serve(
