@@ -1,8 +1,3 @@
-```
-npm install
-npm run dev
-```
+# The Backend of FindYourCut
 
-```
-open http://localhost:3000
-```
+Powering the gallery, uploads, and more of [FindYourCut](https://findyourcut.vercel.app)
