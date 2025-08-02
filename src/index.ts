@@ -17,6 +17,18 @@ app.get('/', (c) => {
 	return c.text('Hello Hono!');
 });
 
+// for the redirect
+app.get('/upload', async (c) => {
+	return c.html(`<!doctype html>
+		
+		<html>
+		<head>
+		<script>
+		location.href = "https://findyourcut.vercel.app/gallery"
+		</script>
+		</head>
+		</html>`);
+});
 // Upload handler
 app.post('/upload', async (c) => {
 	const body = await c.req.parseBody();
@@ -24,12 +36,16 @@ app.post('/upload', async (c) => {
 	const bFile = await file.arrayBuffer();
 	const newFile = Buffer.from(bFile);
 
-	fs.writeFile(`./images/${body['img-title']}.png`, newFile, (err) => {
-		if (err) {
-			console.error('Error writing image:', err);
-		} else {
-			console.log('Image saved successfully!');
-		}
+	return new Promise((resolve) => {
+		fs.writeFile(`./images/${body['img-title']}.png`, newFile, (err) => {
+			if (err) {
+				console.error('Error writing image:', err);
+				resolve(c.json({ error: 'Upload failed' }, 500));
+			} else {
+				console.log('Image saved successfully!');
+				resolve(c.redirect('/upload')); // This will now work
+			}
+		});
 	});
 });
 
