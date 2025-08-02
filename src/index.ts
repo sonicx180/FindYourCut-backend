@@ -24,7 +24,7 @@ app.get('/upload', async (c) => {
 		<html>
 		<head>
 		<script>
-		location.href = "https://findyourcut.vercel.app/gallery"
+		location.href = "https://findyourcut.vercel.app/gallery.html"
 		</script>
 		</head>
 		</html>`);
